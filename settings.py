@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pygame.font import SysFont
 from pygame import init
 init()

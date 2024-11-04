@@ -1,36 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-	CopyLeft 2021 Michael Rouves
-
-	This file is part of Pygame-DoodleJump.
-	Pygame-DoodleJump is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Pygame-DoodleJump is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Pygame-DoodleJump. If not, see <https://www.gnu.org/licenses/>.
-"""
-
-
 from random import randint
 from pygame import Surface
 import asyncio
-
 from singleton import Singleton
 from sprite import Sprite
 import settings as config
 
-
-
 #return True with a chance of: P(X=True)=1/x
 chance = lambda x: not randint(0,x)
-
 
 class Bonus(Sprite):
 	"""
@@ -67,8 +43,7 @@ class Platform(Sprite):
 	Inherits the Sprite class.
 	"""
 	# (Overriding inherited constructor: Sprite.__init__)
-	def __init__(self, x:int, y:int, width:int, height:int,
-			initial_bonus=False,breakable=False):
+	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False):
 
 		color = config.PLATFORM_COLOR
 		if breakable:color = config.PLATFORM_COLOR_LIGHT
@@ -113,8 +88,6 @@ class Platform(Sprite):
 			self.__bonus.draw(surface)
 		if self.camera_rect.y+self.rect.height>config.YWIN:
 			self.__level.remove_platform(self)
-
-
 
 
 
