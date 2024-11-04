@@ -61,7 +61,7 @@ class Game(Singleton):
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:
 					self.close()
-				if event.key == pygame.K_RETURN and self.player.dead:
+				if event.key == pygame.K_SPACE and self.player.dead:
 					self.reset()
 			self.player.handle_event(event)
 
@@ -97,16 +97,12 @@ class Game(Singleton):
 	def run(self):
 		# ============= MAIN GAME LOOP =============
 		while self.__alive:
-			self._event_loop()
+			self._event_loop() 
 			self._update_loop()
 			self._render_loop()
 		pygame.quit()
-
-
-
 
 if __name__ == "__main__":
 	# ============= PROGRAM STARTS HERE =============
 	game = Game()
 	game.run()
-
