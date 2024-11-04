@@ -1,5 +1,6 @@
 from random import randint
 from pygame import Surface
+import pygame
 import asyncio
 from singleton import Singleton
 from sprite import Sprite
@@ -10,108 +11,114 @@ from random import choice
 chance = lambda x: not randint(0,x)
 
 class Bonus(Sprite):
-    """
-    A class to represent a bonus
-    Inherits the Sprite class.
-    """
+	"""
+	A class to represent a bonus
+	Inherits the Sprite class.
+	"""
 
-    WIDTH = 15
-    HEIGHT = 15
+	WIDTH = 15
+	HEIGHT = 15
 
-    def __init__(self, parent:Sprite,color=config.GRAY, force=config.PLAYER_BONUS_JUMPFORCE):
+	def __init__(self, parent:Sprite,color=config.GRAY, force=config.PLAYER_BONUS_JUMPFORCE):
 
-        self.parent = parent
-        super().__init__(*self._get_inital_pos(),
-            Bonus.WIDTH, Bonus.HEIGHT, color)
-        self.force = force
+		self.parent = parent
+		super().__init__(*self._get_inital_pos(), Bonus.WIDTH, Bonus.HEIGHT, color)
+		self.force = force
+		self._image = pygame.image.load("./images/fish.png").convert_alpha()
+		self._image = pygame.transform.scale(self._image, (50, 30))
 
-    def _get_inital_pos(self):
-        x = self.parent.rect.centerx - Bonus.WIDTH//2
-        y = self.parent.rect.y - Bonus.HEIGHT
-        return x,y
+	def _get_inital_pos(self):
+		x = self.parent.rect.centerx - Bonus.WIDTH//2
+		y = self.parent.rect.y - Bonus.HEIGHT - 15
+		return x,y
 
-    def update(self):
-        """
-        Update the bonus position to match the parent platform.
-        """
-        if self.parent.slideable:
-            self.rect.x = self.parent.rect.centerx - Bonus.WIDTH//2
-            self.rect.y = self.parent.rect.y - Bonus.HEIGHT
-        else:
-            self._get_inital_pos()
+	def update(self):
+		"""
+		Update the bonus position to match the parent platform.
+		"""
+		if self.parent.slideable:
+			self.rect.x = self.parent.rect.centerx - Bonus.WIDTH//2
+			self.rect.y = self.parent.rect.y - Bonus.HEIGHT
+		else:
+			self._get_inital_pos()
 
-    def draw(self, surface:Surface) -> None:
-        """
-        Draw the bonus on the surface.
-        """
-        self.update()
-        super().draw(surface)
+	def draw(self, surface:Surface) -> None:
+		"""
+		Draw the bonus on the surface.
+		"""
+		self.update()
+		super().draw(surface)
 
 
 class Platform(Sprite):
-    """
-    A class to represent a platform.
+	"""
+	A class to represent a platform.
 
-    Should only be instantiated by a Level instance.
-    Can have a bonus spring or broke on player jump.
-    Inherits the Sprite class.
-    """
-    # (Overriding inherited constructor: Sprite.__init__)
-    def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False, slideable=False):
-        color = config.PLATFORM_COLOR
-        if breakable:color = config.PLATFORM_COLOR_LIGHT
-        super().__init__(x,y,width,height,color)
+	Should only be instantiated by a Level instance.
+	Can have a bonus spring or broke on player jump.
+	Inherits the Sprite class.
+	"""
+	# (Overriding inherited constructor: Sprite.__init__)
+	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False, slideable=False):
+		color = config.PLATFORM_COLOR
+		if breakable:color = config.PLATFORM_COLOR_LIGHT
+		super().__init__(x,y,width,height,color)
 
-        self.slideable = slideable
-        self.breakable = breakable
-        self.__level = Level.instance
-        self.__bonus = None
-        if initial_bonus:
-            self.add_bonus(Bonus)
+		self.slideable = slideable
+		self.breakable = breakable
+		self.__level = Level.instance
+		self.__bonus = None
+		if initial_bonus:
+			self.add_bonus(Bonus)
 
-        self.speed = config.PLATFORM_SPEED if self.slideable else 0
-        self.direction = choice([-1,1]) if self.slideable else 0
+		self.speed = config.PLATFORM_SPEED if self.slideable else 0
+		self.direction = choice([-1,1]) if self.slideable else 0
+		self._image = pygame.image.load("./images/platform.png").convert_alpha()
+		self._image = pygame.transform.scale(self._image, (120, 30))
 
-    # Public getter for __bonus so it remains private
-    @property
-    def bonus(self):return self.__bonus
+	# Public getter for __bonus so it remains private
+	@property
+	def bonus(self):return self.__bonus
 
-    def add_bonus(self,bonus_type:type) -> None:
-        """ Safely adds a bonus to the platform.
-        :param bonus_type type: the type of bonus to add.
-        """
-        assert issubclass(bonus_type,Bonus), "Not a valid bonus type !"
-        if not self.__bonus and not self.breakable:
-            self.__bonus = bonus_type(self)
+	def add_bonus(self,bonus_type:type) -> None:
+		""" Safely adds a bonus to the platform.
+		:param bonus_type type: the type of bonus to add.
+		"""
+		assert issubclass(bonus_type,Bonus), "Not a valid bonus type !"
+		if not self.__bonus and not self.breakable:
+			self.__bonus = bonus_type(self)
 
-    def remove_bonus(self) -> None:
-        " Safely removes platform's bonus."
-        self.__bonus = None
+	def remove_bonus(self) -> None:
+		" Safely removes platform's bonus."
+		self.__bonus = None
 
-    def onCollide(self) -> None:
-        " Called in update if collision with player (safe to overrided)."
-        if self.breakable:
-            self.__level.remove_platform(self)
+	def onCollide(self) -> None:
+		" Called in update if collision with player (safe to overrided)."
+		if self.breakable:
+			self.__level.remove_platform(self)
 
-    # ( Overriding inheritance: Sprite.draw() )
-    def draw(self, surface:Surface) -> None:
-        """ Like Sprite.draw().
-        Also draws the platform's bonus if it has one.
-        :param surface pygame.Surface: the surface to draw on.
-        """
-        # check if out of screen: should be deleted
-        self.slide()
-        super().draw(surface)
-        if self.__bonus:
-            self.__bonus.draw(surface)
-        if self.camera_rect.y+self.rect.height>config.YWIN:
-            self.__level.remove_platform(self)
+	# ( Overriding inheritance: Sprite.draw() )
+	def draw(self, surface:Surface) -> None:
+		""" Like Sprite.draw().
+		Also draws the platform's bonus if it has one.
+		:param surface pygame.Surface: the surface to draw on.
+		"""
+		# check if out of screen: should be deleted
+		self.slide()
+		super().draw(surface)
+		if self.__bonus:
+			self.__bonus.draw(surface)
+		if self.camera_rect.y+self.rect.height>config.YWIN:
+			self.__level.remove_platform(self)
+		if self.breakable:
+			self._image = pygame.image.load("./images/ice_break.png").convert_alpha()
+			self._image = pygame.transform.scale(self._image, (120, 30))
 
-    def slide(self):
-        if self.slideable:
-            self.rect.x += self.speed * self.direction
-            if self.rect.right >= config.XWIN or self.rect.left <= 0:
-                self.direction *= -1
+	def slide(self):
+		if self.slideable:
+			self.rect.x += self.speed * self.direction
+			if self.rect.right >= config.XWIN or self.rect.left <= 0:
+				self.direction *= -1
 			
 
 class Level(Singleton):
