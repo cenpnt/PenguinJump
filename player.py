@@ -50,9 +50,12 @@ class Player(Sprite, Singleton):
 		Create a bullet and add it to the bullet group.
 		"""
 		bullet_x = self.rect.centerx
-		bullet_y = self.rect.top  # Use player's top position
+		bullet_y = self.rect.top - 10
 		new_bullet = Bullet(bullet_x, bullet_y, config.BULLET_SPEED)
+		new_bullet.set_position(bullet_x, bullet_y)
 		self.bullets.add(new_bullet)
+		self._image = pygame.image.load("./images/penguin-shoot.png").convert_alpha()
+		self._image = pygame.transform.scale(self._image, (60, 60))
 
 
 	def _fix_velocity(self) -> None:

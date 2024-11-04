@@ -2,8 +2,8 @@ import pygame
 from sprite import Sprite
 import settings as config
 from math import copysign
-from camera import Camera  # Ensure Camera is correctly imported
 
+# Return the sign of a number: getsign(-5) -> -1
 getsign = lambda x: copysign(1, x)
 
 class Bullet(Sprite):
@@ -31,16 +31,15 @@ class Bullet(Sprite):
         """
         Update the bullet's position by moving it upwards.
         """
-        self.rect.y -= self.speed  # Move bullet upwards in world coordinates
+        self.rect.y -= self.speed
         # Optionally, remove bullet if it goes out of screen bounds
         if self.rect.bottom < 0:
             self.kill()  # Removes bullet from all groups it's in
 
-    def render(self, surface):
+    def set_position(self, penguin_x: int, penguin_y: int):
         """
-        Render the bullet on the provided surface, accounting for the camera position.
-        :param surface: The surface to render the bullet on.
+        Set the bullet's position to match the penguin's current position.
+        This method is called when firing the bullet.
         """
-        # Apply camera transformation for rendering
-        transformed_rect = Camera.instance.apply(self)  # Adjusted position based on the camera
-        surface.blit(self._image, transformed_rect)
+        self.rect.x = penguin_x
+        self.rect.y = penguin_y
