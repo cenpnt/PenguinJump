@@ -6,6 +6,7 @@ from singleton import Singleton
 from sprite import Sprite
 import settings as config
 from random import choice
+from enemy import Enemy
 
 #return True with a chance of: P(X=True)=1/x
 chance = lambda x: not randint(0,x)
@@ -29,7 +30,7 @@ class Bonus(Sprite):
 
 	def _get_inital_pos(self):
 		x = self.parent.rect.centerx - Bonus.WIDTH//2
-		y = self.parent.rect.y - Bonus.HEIGHT - 15
+		y = self.parent.rect.y - Bonus.HEIGHT - 20
 		return x,y
 
 	def update(self):
@@ -38,7 +39,7 @@ class Bonus(Sprite):
 		"""
 		if self.parent.slideable:
 			self.rect.x = self.parent.rect.centerx - Bonus.WIDTH//2
-			self.rect.y = self.parent.rect.y - Bonus.HEIGHT
+			self.rect.y = self.parent.rect.y - Bonus.HEIGHT - 15
 		else:
 			self._get_inital_pos()
 
@@ -59,7 +60,7 @@ class Platform(Sprite):
 	Inherits the Sprite class.
 	"""
 	# (Overriding inherited constructor: Sprite.__init__)
-	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False, slideable=False):
+	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False, slideable=False, has_enemy=False):
 		color = config.PLATFORM_COLOR
 		if breakable:color = config.PLATFORM_COLOR_LIGHT
 		super().__init__(x,y,width,height,color)
@@ -68,6 +69,10 @@ class Platform(Sprite):
 		self.breakable = breakable
 		self.__level = Level.instance
 		self.__bonus = None
+		self.__enemy = None
+		if has_enemy:
+			self.add_enemy(Enemy)
+
 		if initial_bonus:
 			self.add_bonus(Bonus)
 
@@ -80,17 +85,33 @@ class Platform(Sprite):
 	@property
 	def bonus(self):return self.__bonus
 
+	@property
+	def enemy(self):return self.__enemy
+
 	def add_bonus(self,bonus_type:type) -> None:
 		""" Safely adds a bonus to the platform.
 		:param bonus_type type: the type of bonus to add.
 		"""
 		assert issubclass(bonus_type,Bonus), "Not a valid bonus type !"
-		if not self.__bonus and not self.breakable:
+		if not self.__bonus and not self.breakable and not self.__enemy:
 			self.__bonus = bonus_type(self)
+
+	def add_enemy(self, enemy_type: type) -> None:
+		"""
+		Safely adds an enemy to the platform.
+		:param enemy_type type: the type of enemy to add.
+		"""
+		assert issubclass(enemy_type, Enemy), "Not a valid enemy type!"
+		if not self.__enemy and not self.breakable and not self.__bonus:
+			self.__enemy = enemy_type(self)
 
 	def remove_bonus(self) -> None:
 		" Safely removes platform's bonus."
 		self.__bonus = None
+
+	def remove_enemy(self) -> None:
+		"""Safely removes platform's enemy."""
+		self.__enemy = None
 
 	def onCollide(self) -> None:
 		" Called in update if collision with player (safe to overrided)."
@@ -108,6 +129,8 @@ class Platform(Sprite):
 		super().draw(surface)
 		if self.__bonus:
 			self.__bonus.draw(surface)
+		if self.__enemy:
+			self.__enemy.draw(surface)
 		if self.camera_rect.y+self.rect.height>config.YWIN:
 			self.__level.remove_platform(self)
 		if self.breakable:
@@ -140,6 +163,7 @@ class Level(Singleton):
 		self.bonus_platform_chance = config.BONUS_SPAWN_CHANCE
 		self.breakable_platform_chance = config.BREAKABLE_PLATFORM_CHANCE
 		self.slideable_platform_chance = config.SLIDEABLE_PLATFORM_CHANCE
+		self.enemy_spawn_chance = config.ENEMY_SPAWN_CHANCE
 
 		self.__platforms = []
 		self.__to_remove = []
@@ -177,7 +201,9 @@ class Level(Singleton):
 				*self.platform_size, #                               SIZE
 				initial_bonus=chance(self.bonus_platform_chance),# HAS A Bonus
 				breakable=chance(self.breakable_platform_chance),#  IS BREAKABLE
-				slideable=chance(self.slideable_platform_chance)))# is slideable
+				slideable=chance(self.slideable_platform_chance),# IS SLIDEABLE
+				has_enemy=chance(self.enemy_spawn_chance) # HAS AN ENEMY
+				))
 				
 		else:
 			# (just in case) no platform: add the base one
@@ -199,9 +225,8 @@ class Level(Singleton):
 		" Called only when game restarts (after player death)."
 		self.__platforms = [self.__base_platform]
 
-
 	def update(self) -> None:
-		" Should be called each frame in main game loop for generation."
+		"""Called each frame in main game loop for generation."""
 		for platform in self.__to_remove:
 			if platform in self.__platforms:
 				self.__platforms.remove(platform)
