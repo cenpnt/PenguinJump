@@ -84,20 +84,16 @@ class Player(Sprite, Singleton):
 				self._image = pygame.transform.scale(self._image, (60, 60))
 		#Check if stop moving
 		elif event.type == KEYUP:
-			if (event.key== K_LEFT and self._input==-1) or (
-					event.key==K_RIGHT and self._input==1):
+			if (event.key == K_LEFT and self._input == -1) or (event.key == K_RIGHT and self._input == 1):
 				self._input = 0
 	
-
 	def jump(self,force:float=None) -> None:
 		if not force:force = self._jumpforce
 		self._velocity.y = -force
 
-
 	def onCollide(self, obj:Sprite) -> None:
 		self.rect.bottom = obj.rect.top
 		self.jump()
-	
 
 	def collisions(self) -> None:
 		""" Checks for collisions with level.
@@ -130,14 +126,14 @@ class Player(Sprite, Singleton):
 		#Velocity update (apply gravity, input acceleration)
 		self._velocity.y += self.gravity
 		if self._input: # accelerate
-			self._velocity.x += self._input*self.accel
+			self._velocity.x += self._input * self.accel
 		elif self._velocity.x: # deccelerate
-			self._velocity.x -= getsign(self._velocity.x)*self.deccel
+			self._velocity.x -= getsign(self._velocity.x) * self.deccel
 			self._velocity.x = round(self._velocity.x)
 		self._fix_velocity()
 
 		#Position Update (prevent x-axis to be out of screen)
-		self.rect.x = (self.rect.x+self._velocity.x)%(config.XWIN-self.rect.width)
+		self.rect.x = (self.rect.x + self._velocity.x) % (config.XWIN - self.rect.width)
 		self.rect.y += self._velocity.y
 
 		self.collisions()

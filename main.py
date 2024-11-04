@@ -1,12 +1,9 @@
 import pygame, sys
-
 from singleton import Singleton
 from camera import Camera
 from player import Player
 from level import Level
 import settings as config
-
-
 
 class Game(Singleton):
 	"""
