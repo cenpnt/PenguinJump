@@ -1,14 +1,14 @@
 from math import copysign
-import pygame 
+import pygame
 from pygame.math import Vector2
 from pygame.locals import KEYDOWN,KEYUP,K_LEFT,K_RIGHT
 from pygame.sprite import collide_rect
 from pygame.event import Event
-
 from singleton import Singleton
 from sprite import Sprite
 from level import Level
 import settings as config
+
 
 
 #Return the sign of a number: getsign(-5)-> -1
@@ -17,23 +17,23 @@ getsign = lambda x : copysign(1, x)
 class Player(Sprite, Singleton):
 	"""
 	A class to represent the player.
-
+	
 	Manages player's input,physics (movement...).
 	Can be access via Singleton: Player.instance.
 	(Check Singleton design pattern for more info).
 	"""
-	def __init__(self, *args):
-		# calling default Sprite constructor
-		super().__init__(*args)
-
+	# (Overriding Sprite.__init__ constructor)
+	def __init__(self,*args):
+		#calling default Sprite constructor
+		Sprite.__init__(self,*args)
 		# Create image attribute directly on the instance
 		self._image = pygame.image.load("./images/penguin-right.png").convert_alpha()
-		self._image = pygame.transform.scale(self._image, (50, 50))
+		self._image = pygame.transform.scale(self._image, (60, 60))
 
 		# Set rect based on the image dimensions
 		self._rect = self._image.get_rect()
-		self.__startrect = self._rect.copy()
-		self.__maxvelocity = Vector2(config.PLAYER_MAX_SPEED, 100)
+		self.__startrect = self.rect.copy()
+		self.__maxvelocity = Vector2(config.PLAYER_MAX_SPEED,100)
 		self.__startspeed = 1.5
 
 		self._velocity = Vector2()
@@ -42,25 +42,10 @@ class Player(Sprite, Singleton):
 		self._bonus_jumpforce = config.PLAYER_BONUS_JUMPFORCE
 
 		self.gravity = config.GRAVITY
-		self.accel = 0.5
-		self.deccel = 0.6
+		self.accel = .5
+		self.deccel = .6
 		self.dead = False
-
-		@property
-		def image(self):
-			return self._image
-
-		@property
-		def rect(self):
-			return self._rect
-
-		@rect.setter
-		def rect(self, value):
-			self._rect = value
-
-	def draw(self, screen):
-		"""Draw the player image at the current position on the screen."""
-		screen.blit(self.image, self.rect)
+	
 
 	def _fix_velocity(self) -> None:
 		""" Set player's velocity between max/min.
@@ -70,6 +55,7 @@ class Player(Sprite, Singleton):
 		self._velocity.y = round(max(self._velocity.y,-self.__maxvelocity.y),2)
 		self._velocity.x = min(self._velocity.x,self.__maxvelocity.x)
 		self._velocity.x = round(max(self._velocity.x,-self.__maxvelocity.x),2)
+
 
 	def reset(self) -> None:
 		" Called only when game restarts (after player death)."
@@ -85,19 +71,23 @@ class Player(Sprite, Singleton):
 		"""
 		# Check if start moving
 		if event.type == KEYDOWN:
-		# Moves player only on x-axis (left/right)
+			# Moves player only on x-axis (left/right)
 			if event.key == K_LEFT:
 				self._velocity.x=-self.__startspeed
 				self._input = -1
+				self._image = pygame.image.load("./images/penguin-left.png").convert_alpha()
+				self._image = pygame.transform.scale(self._image, (60, 60))
 			elif event.key == K_RIGHT:
 				self._velocity.x=self.__startspeed
 				self._input = 1
+				self._image = pygame.image.load("./images/penguin-right.png").convert_alpha()
+				self._image = pygame.transform.scale(self._image, (60, 60))
 		#Check if stop moving
 		elif event.type == KEYUP:
 			if (event.key== K_LEFT and self._input==-1) or (
-				event.key==K_RIGHT and self._input==1):
+					event.key==K_RIGHT and self._input==1):
 				self._input = 0
-
+	
 
 	def jump(self,force:float=None) -> None:
 		if not force:force = self._jumpforce
@@ -107,7 +97,7 @@ class Player(Sprite, Singleton):
 	def onCollide(self, obj:Sprite) -> None:
 		self.rect.bottom = obj.rect.top
 		self.jump()
-
+	
 
 	def collisions(self) -> None:
 		""" Checks for collisions with level.
@@ -123,10 +113,10 @@ class Player(Sprite, Singleton):
 					self.onCollide(platform.bonus)
 					self.jump(platform.bonus.force)
 
-					# check collisions with platform
-					if collide_rect(self,platform):
-						self.onCollide(platform)
-						platform.onCollide()
+				# check collisions with platform
+				if collide_rect(self,platform):
+					self.onCollide(platform)
+					platform.onCollide()
 
 
 	def update(self) -> None:
