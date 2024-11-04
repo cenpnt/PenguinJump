@@ -23,6 +23,9 @@ class Game(Singleton):
 		self.window = pygame.display.set_mode(config.DISPLAY,config.FLAGS)
 		self.clock = pygame.time.Clock()
 
+		self.background = pygame.image.load("./images/background.png").convert()
+		self.background = pygame.transform.scale(self.background, config.DISPLAY)
+
 		# Instances
 		self.camera = Camera()
 		self.lvl = Level()
@@ -38,7 +41,7 @@ class Game(Singleton):
 		self.score_txt = config.SMALL_FONT.render("0 m",1,config.GRAY)
 		self.score_pos = pygame.math.Vector2(10,10)
 
-		self.gameover_txt = config.LARGE_FONT.render("Game Over",1,config.GRAY)
+		self.gameover_txt = config.LARGE_FONT.render("Game Over",1,config.WHITE)
 		self.gameover_rect = self.gameover_txt.get_rect(
 			center=(config.HALF_XWIN,config.HALF_YWIN))
 	
@@ -61,7 +64,7 @@ class Game(Singleton):
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_ESCAPE:
 					self.close()
-				if event.key == pygame.K_RETURN and self.player.dead:
+				if event.key == pygame.K_SPACE and self.player.dead:
 					self.reset()
 			self.player.handle_event(event)
 
@@ -81,7 +84,8 @@ class Game(Singleton):
 
 	def _render_loop(self):
 		# ----------- Display -----------
-		self.window.fill(config.WHITE)
+		#self.window.fill(config.WHITE)
+		self.window.blit(self.background, (0,0))
 		self.lvl.draw(self.window)
 		self.player.draw(self.window)
 
@@ -97,16 +101,12 @@ class Game(Singleton):
 	def run(self):
 		# ============= MAIN GAME LOOP =============
 		while self.__alive:
-			self._event_loop()
+			self._event_loop() 
 			self._update_loop()
 			self._render_loop()
 		pygame.quit()
-
-
-
 
 if __name__ == "__main__":
 	# ============= PROGRAM STARTS HERE =============
 	game = Game()
 	game.run()
-

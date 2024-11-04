@@ -1,9 +1,11 @@
 from random import randint
 from pygame import Surface
+import pygame
 import asyncio
 from singleton import Singleton
 from sprite import Sprite
 import settings as config
+from random import choice
 
 #return True with a chance of: P(X=True)=1/x
 chance = lambda x: not randint(0,x)
@@ -17,21 +19,35 @@ class Bonus(Sprite):
 	WIDTH = 15
 	HEIGHT = 15
 
-	def __init__(self, parent:Sprite,color=config.GRAY,
-			force=config.PLAYER_BONUS_JUMPFORCE):
+	def __init__(self, parent:Sprite,color=config.GRAY, force=config.PLAYER_BONUS_JUMPFORCE):
 
 		self.parent = parent
-		super().__init__(*self._get_inital_pos(),
-			Bonus.WIDTH, Bonus.HEIGHT, color)
+		super().__init__(*self._get_inital_pos(), Bonus.WIDTH, Bonus.HEIGHT, color)
 		self.force = force
-	
+		self._image = pygame.image.load("./images/fish.png").convert_alpha()
+		self._image = pygame.transform.scale(self._image, (50, 30))
+
 	def _get_inital_pos(self):
 		x = self.parent.rect.centerx - Bonus.WIDTH//2
-		y = self.parent.rect.y - Bonus.HEIGHT
+		y = self.parent.rect.y - Bonus.HEIGHT - 15
 		return x,y
 
+	def update(self):
+		"""
+		Update the bonus position to match the parent platform.
+		"""
+		if self.parent.slideable:
+			self.rect.x = self.parent.rect.centerx - Bonus.WIDTH//2
+			self.rect.y = self.parent.rect.y - Bonus.HEIGHT
+		else:
+			self._get_inital_pos()
 
-
+	def draw(self, surface:Surface) -> None:
+		"""
+		Draw the bonus on the surface.
+		"""
+		self.update()
+		super().draw(surface)
 
 
 class Platform(Sprite):
@@ -43,17 +59,22 @@ class Platform(Sprite):
 	Inherits the Sprite class.
 	"""
 	# (Overriding inherited constructor: Sprite.__init__)
-	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False):
-
+	def __init__(self, x:int, y:int, width:int, height:int, initial_bonus=False, breakable=False, slideable=False):
 		color = config.PLATFORM_COLOR
 		if breakable:color = config.PLATFORM_COLOR_LIGHT
 		super().__init__(x,y,width,height,color)
 
+		self.slideable = slideable
 		self.breakable = breakable
 		self.__level = Level.instance
 		self.__bonus = None
 		if initial_bonus:
 			self.add_bonus(Bonus)
+
+		self.speed = config.PLATFORM_SPEED if self.slideable else 0
+		self.direction = choice([-1,1]) if self.slideable else 0
+		self._image = pygame.image.load("./images/platform.png").convert_alpha()
+		self._image = pygame.transform.scale(self._image, (120, 30))
 
 	# Public getter for __bonus so it remains private
 	@property
@@ -66,7 +87,7 @@ class Platform(Sprite):
 		assert issubclass(bonus_type,Bonus), "Not a valid bonus type !"
 		if not self.__bonus and not self.breakable:
 			self.__bonus = bonus_type(self)
-	
+
 	def remove_bonus(self) -> None:
 		" Safely removes platform's bonus."
 		self.__bonus = None
@@ -75,7 +96,7 @@ class Platform(Sprite):
 		" Called in update if collision with player (safe to overrided)."
 		if self.breakable:
 			self.__level.remove_platform(self)
-		
+
 	# ( Overriding inheritance: Sprite.draw() )
 	def draw(self, surface:Surface) -> None:
 		""" Like Sprite.draw().
@@ -83,13 +104,22 @@ class Platform(Sprite):
 		:param surface pygame.Surface: the surface to draw on.
 		"""
 		# check if out of screen: should be deleted
+		self.slide()
 		super().draw(surface)
 		if self.__bonus:
 			self.__bonus.draw(surface)
 		if self.camera_rect.y+self.rect.height>config.YWIN:
 			self.__level.remove_platform(self)
+		if self.breakable:
+			self._image = pygame.image.load("./images/ice_break.png").convert_alpha()
+			self._image = pygame.transform.scale(self._image, (120, 30))
 
-
+	def slide(self):
+		if self.slideable:
+			self.rect.x += self.speed * self.direction
+			if self.rect.right >= config.XWIN or self.rect.left <= 0:
+				self.direction *= -1
+			
 
 class Level(Singleton):
 	"""
@@ -109,6 +139,7 @@ class Level(Singleton):
 
 		self.bonus_platform_chance = config.BONUS_SPAWN_CHANCE
 		self.breakable_platform_chance = config.BREAKABLE_PLATFORM_CHANCE
+		self.slideable_platform_chance = config.SLIDEABLE_PLATFORM_CHANCE
 
 		self.__platforms = []
 		self.__to_remove = []
@@ -130,8 +161,8 @@ class Level(Singleton):
 		# Check how many platform we need to generate
 		nb_to_generate = self.max_platforms - len(self.__platforms)
 		for _ in range(nb_to_generate):
-			self.create_platform()
-		
+			self.create_platform()	
+
 
 	def create_platform(self) -> None:
 		" Create the first platform or a new one."
@@ -145,7 +176,9 @@ class Level(Singleton):
 				self.__platforms[-1].rect.y-offset,#                 Y POS
 				*self.platform_size, #                               SIZE
 				initial_bonus=chance(self.bonus_platform_chance),# HAS A Bonus
-				breakable=chance(self.breakable_platform_chance)))#  IS BREAKABLE
+				breakable=chance(self.breakable_platform_chance),#  IS BREAKABLE
+				slideable=chance(self.slideable_platform_chance)))# is slideable
+				
 		else:
 			# (just in case) no platform: add the base one
 			self.__platforms.append(self.__base_platform)
