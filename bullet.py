@@ -41,5 +41,9 @@ class Bullet(Sprite):
         """
         self.rect.x = penguin_x
         self.rect.y = penguin_y
+
+ 
+
+
     
     

@@ -4,6 +4,7 @@ from camera import Camera
 from player import Player
 from level import Level
 import settings as config
+from enemy import Enemy
 
 class Game(Singleton):
 	"""
@@ -58,6 +59,9 @@ class Game(Singleton):
 		self.lvl.reset()
 		self.player.reset()
 
+		# Reset the enemies and their bullets
+		for enemy in Enemy.instances:
+			enemy.reset()
 
 	def _event_loop(self):
 		# ---------- User Events ----------

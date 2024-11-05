@@ -10,6 +10,7 @@ from sprite import Sprite
 from level import Level
 from bullet import Bullet
 import settings as config
+from enemy import Enemy
 
 #Return the sign of a number: getsign(-5)-> -1
 getsign = lambda x : copysign(1, x)
@@ -52,11 +53,11 @@ class Player(Sprite, Singleton):
 		"""
 		bullet_x = self.rect.centerx
 		bullet_y = self.rect.top - 10
-		new_bullet = Bullet(bullet_x, bullet_y, config.BULLET_SPEED)
+		new_bullet = Bullet(bullet_x, bullet_y, config.BULLET_SPEED, is_player_bullet=True)
 		new_bullet.set_position(bullet_x, bullet_y)
 		self.bullets.add(new_bullet)
 		self._image = pygame.image.load("./images/penguin-shoot.png").convert_alpha()
-		self._image = pygame.transform.scale(self._image, (60, 60))
+		self._image = pygame.transform.scale(self._image, (40, 60))
 
 
 	def _fix_velocity(self) -> None:
@@ -74,6 +75,7 @@ class Player(Sprite, Singleton):
 		self.rect = self.__startrect.copy()
 		self.camera_rect = self.__startrect.copy()
 		self.dead = False
+		self.bullets.empty()
 
 	def handle_event(self, event: Event) -> None:
 		""" Called in main loop foreach user input event.
@@ -127,13 +129,16 @@ class Player(Sprite, Singleton):
 					platform.onCollide()
 
 	def update(self, camera: Camera) -> None:
-		""" For position and velocity updates.
-		Should be called each frame.
-		"""
 		# Check if player out of screen: should be dead
 		if self.rect.top > config.YWIN:
 			self.dead = True
+
+		# If player is dead, disable all actions
+		if self.dead:
+			self._velocity.x = 0
+			self._velocity.y = 0
 			return
+
 		# Velocity update (apply gravity, input acceleration)
 		self._velocity.y += self.gravity
 		if self._input:  # accelerate
@@ -142,6 +147,16 @@ class Player(Sprite, Singleton):
 			self._velocity.x -= getsign(self._velocity.x) * self.deccel
 			self._velocity.x = round(self._velocity.x)
 		self._fix_velocity()
+
+		# Check for collisions with enemy bullets
+		for enemy in Enemy.instances:
+			for bullet in enemy.bullets:
+				if pygame.sprite.collide_rect(self, bullet):
+					self._image = pygame.image.load("./images/tombstone.png").convert_alpha()
+					self._image = pygame.transform.scale(self._image, (60, 60))
+					bullet.kill()
+					self.dead = True
+					return
 
 		# Position Update (prevent x-axis to be out of screen)
 		self.rect.x = (self.rect.x + self._velocity.x) % (config.XWIN - self.rect.width)
