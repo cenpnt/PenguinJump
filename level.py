@@ -18,7 +18,7 @@ class Bonus(Sprite):
 	Inherits the Sprite class.
 	"""
 
-	WIDTH = 15
+	WIDTH = 30
 	HEIGHT = 15
 
 	def __init__(self, parent:Sprite,color=config.GRAY, force=config.PLAYER_BONUS_JUMPFORCE):
