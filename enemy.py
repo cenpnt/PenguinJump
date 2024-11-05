@@ -2,6 +2,7 @@ from sprite import Sprite
 import settings as config
 import pygame
 from bullet import Bullet  # Import Bullet class
+from camera import Camera
 
 class Enemy(Sprite):
     """
@@ -34,7 +35,7 @@ class Enemy(Sprite):
             self.bullets.add(bullet)
             self.last_shot_time = current_time
 
-    def update(self):
+    def update(self, camera: Camera):
         """
         Update the enemy position and shoot bullets periodically.
         """
@@ -45,14 +46,16 @@ class Enemy(Sprite):
             self._get_initial_pos()
 
         self.shoot()  # Call the shoot method to create bullets
-        self.bullets.update()  # Update bullets
+        self.bullets.update(camera)  # Update bullets
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, camera: Camera) -> None:
         """
         Draw the enemy and its bullets on the surface.
         """
-        self.update()
+        self.update(camera)
         super().draw(surface)
         # Draw bullets
         for bullet in self.bullets:
             bullet.draw(surface)
+
+    

@@ -4,6 +4,7 @@ from pygame.math import Vector2
 from pygame.locals import KEYDOWN,KEYUP,K_LEFT,K_RIGHT, K_SPACE
 from pygame.sprite import collide_rect
 from pygame.event import Event
+from camera import Camera
 from singleton import Singleton
 from sprite import Sprite
 from level import Level
@@ -125,12 +126,12 @@ class Player(Sprite, Singleton):
 					self.onCollide(platform)
 					platform.onCollide()
 
-	def update(self) -> None:
+	def update(self, camera: Camera) -> None:
 		""" For position and velocity updates.
 		Should be called each frame.
 		"""
 		# Check if player out of screen: should be dead
-		if self.camera_rect.y > config.YWIN * 2:
+		if self.rect.top > config.YWIN:
 			self.dead = True
 			return
 		# Velocity update (apply gravity, input acceleration)
@@ -147,10 +148,15 @@ class Player(Sprite, Singleton):
 		self.rect.y += self._velocity.y
 
 		self.collisions()
-		self.bullets.update()  # Update all bullets
+		for bullet in self.bullets:
+			bullet.update(camera)
 
-	def draw(self, surface: pygame.Surface) -> None:
-		# Draw player
-		super().draw(surface)
-		# Draw all bullets
-		self.bullets.draw(surface)
+	def draw(self, surface: pygame.Surface, camera: Camera) -> None:
+		# Draw player with camera transformation
+		surface.blit(self._image, camera.apply(self))
+		
+		# Draw each bullet with camera transformation
+		for bullet in self.bullets:
+			surface.blit(bullet._image, camera.apply(bullet))
+
+	

@@ -2,6 +2,7 @@ import pygame
 from sprite import Sprite
 import settings as config
 from math import copysign
+from camera import Camera
 
 # Return the sign of a number: getsign(-5) -> -1
 getsign = lambda x: copysign(1, x)
@@ -14,27 +15,24 @@ class Bullet(Sprite):
     WIDTH = 5
     HEIGHT = 15
 
-    def __init__(self, x: int, y: int, speed: int = config.BULLET_SPEED, color=config.BULLET_COLOR):
+    def __init__(self, x: int, y: int, speed: int = config.BULLET_SPEED, color=config.BULLET_COLOR, is_player_bullet: bool = True):
         """
-        Initialize the bullet with a position, speed, and color.
-        :param x: The initial x-coordinate of the bullet.
-        :param y: The initial y-coordinate of the bullet.
-        :param speed: The speed at which the bullet travels.
-        :param color: The color of the bullet.
+        Initialize the bullet with a position, speed, color, and type.
+        :param is_player_bullet: If True, bullet was fired by player; else by enemy.
         """
         super().__init__(x, y, Bullet.WIDTH, Bullet.HEIGHT, color)
         self.speed = speed
+        self.is_player_bullet = is_player_bullet
         self._image = pygame.Surface((Bullet.WIDTH, Bullet.HEIGHT))
         self._image.fill(color)
 
-    def update(self):
-        """
-        Update the bullet's position by moving it upwards.
-        """
-        self.rect.y -= self.speed
-        # Optionally, remove bullet if it goes out of screen bounds
-        if self.rect.bottom < 0:
-            self.kill()  # Removes bullet from all groups it's in
+    def update(self, camera: Camera):
+        # Move bullet upwards or downwards based on its type
+        self.rect.y -= self.speed if self.is_player_bullet else -self.speed
+        
+        # Remove bullet if it goes out of screen bounds
+        if self.rect.bottom < camera.state.top or self.rect.top > camera.state.bottom:
+            self.kill()
 
     def set_position(self, penguin_x: int, penguin_y: int):
         """
@@ -43,3 +41,5 @@ class Bullet(Sprite):
         """
         self.rect.x = penguin_x
         self.rect.y = penguin_y
+    
+    
