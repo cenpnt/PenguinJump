@@ -7,6 +7,7 @@ from sprite import Sprite
 import settings as config
 from random import choice
 from enemy import Enemy
+from camera import Camera
 
 #return True with a chance of: P(X=True)=1/x
 chance = lambda x: not randint(0,x)
@@ -17,7 +18,7 @@ class Bonus(Sprite):
 	Inherits the Sprite class.
 	"""
 
-	WIDTH = 15
+	WIDTH = 30
 	HEIGHT = 15
 
 	def __init__(self, parent:Sprite,color=config.GRAY, force=config.PLAYER_BONUS_JUMPFORCE):
@@ -119,7 +120,7 @@ class Platform(Sprite):
 			self.__level.remove_platform(self)
 
 	# ( Overriding inheritance: Sprite.draw() )
-	def draw(self, surface:Surface) -> None:
+	def draw(self, surface:Surface, camera: Camera) -> None:
 		""" Like Sprite.draw().
 		Also draws the platform's bonus if it has one.
 		:param surface pygame.Surface: the surface to draw on.
@@ -130,7 +131,7 @@ class Platform(Sprite):
 		if self.__bonus:
 			self.__bonus.draw(surface)
 		if self.__enemy:
-			self.__enemy.draw(surface)
+			self.__enemy.draw(surface, camera)
 		if self.camera_rect.y+self.rect.height>config.YWIN:
 			self.__level.remove_platform(self)
 		if self.breakable:
@@ -234,9 +235,9 @@ class Level(Singleton):
 		asyncio.run(self._generation())
 
 
-	def draw(self,surface:Surface) -> None:
+	def draw(self,surface:Surface, camera: Camera) -> None:
 		""" Called each frame in main loop, draws each platform
 		:param surface pygame.Surface: the surface to draw on.
 		"""
 		for platform in self.__platforms:
-			platform.draw(surface)
+			platform.draw(surface, camera)

@@ -4,6 +4,7 @@ from camera import Camera
 from player import Player
 from level import Level
 import settings as config
+from enemy import Enemy
 
 class Game(Singleton):
 	"""
@@ -36,6 +37,9 @@ class Game(Singleton):
 			config.PLAYER_COLOR#  COLOR
 		)
 
+		self.bullets = pygame.sprite.Group()
+
+
 		# User Interface
 		self.score = 0
 		self.score_txt = config.SMALL_FONT.render("0 m",1,config.GRAY)
@@ -55,6 +59,9 @@ class Game(Singleton):
 		self.lvl.reset()
 		self.player.reset()
 
+		# Reset the enemies and their bullets
+		for enemy in Enemy.instances:
+			enemy.reset()
 
 	def _event_loop(self):
 		# ---------- User Events ----------
@@ -71,7 +78,7 @@ class Game(Singleton):
 
 	def _update_loop(self):
 		# ----------- Update -----------
-		self.player.update()
+		self.player.update(self.camera)
 		self.lvl.update()
 
 		if not self.player.dead:
@@ -82,12 +89,12 @@ class Game(Singleton):
 				str(self.score)+" m", 1, config.GRAY)
 	
 
-	def _render_loop(self):
+	def _render_loop(self, camera: Camera):
 		# ----------- Display -----------
 		#self.window.fill(config.WHITE)
 		self.window.blit(self.background, (0,0))
-		self.lvl.draw(self.window)
-		self.player.draw(self.window)
+		self.lvl.draw(self.window, camera)
+		self.player.draw(self.window, Camera.instance)
 
 		# User Interface
 		if self.player.dead:
@@ -103,7 +110,7 @@ class Game(Singleton):
 		while self.__alive:
 			self._event_loop() 
 			self._update_loop()
-			self._render_loop()
+			self._render_loop(self.camera)
 		pygame.quit()
 
 if __name__ == "__main__":
