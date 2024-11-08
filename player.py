@@ -24,10 +24,6 @@ BUTTON_GPIO_PIN = 17  # GPIO pin number for the button; adjust as needed
 GPIO.setmode(GPIO.BCM)  # Use Broadcom pin-numbering scheme
 GPIO.setup(BUTTON_GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-if GPIO.input(BUTTON_GPIO_PIN) == GPIO.HIGH:
-	print("test shooting")
-
-
 class Player(Sprite, Singleton):
     def __init__(self, *args):
         # calling default Sprite constructor
@@ -65,7 +61,7 @@ class Player(Sprite, Singleton):
         self.accel = 0.5
         self.deccel = 0.6
         self.dead = False
-        self.gyro_movement_modifier = 0.75 
+        self.gyro_movement_modifier = 0.5 
 
     def init_gyro_sensor(self, retries=3):
         """
@@ -73,7 +69,6 @@ class Player(Sprite, Singleton):
         """
         try:
             from mpu6050 import mpu6050
-            print(dir(mpu6050))
             for attempt in range(retries):
                 try:
                     self.gyro_sensor = mpu6050.mpu6050(0x68)
@@ -104,6 +99,9 @@ class Player(Sprite, Singleton):
         Reads the gyroscope data and sets the _input attribute for movement.
         Detects only the direction (left or right) and moves continuously in that direction.
         """
+        if self.dead:
+            self._input = 0
+            return
         if self.gyro_sensor is None:
             # Fallback to keyboard input if gyro is not available
             keys = pygame.key.get_pressed()
@@ -170,6 +168,7 @@ class Player(Sprite, Singleton):
         self.camera_rect = self.__startrect.copy()
         self.dead = False
         self.bullets.empty()
+        self._image = self._image_right
 
     def handle_event(self, event: pygame.event.Event):
         current_time = time.time()
@@ -210,7 +209,8 @@ class Player(Sprite, Singleton):
 
     def update(self, camera: Camera):
         # Update player input based on gyro data or keyboard
-        self.read_gyro_input()
+        if not self.dead:
+                self.read_gyro_input()
 
         # Check if player out of screen: should be dead
         if self.rect.top > config.YWIN:
