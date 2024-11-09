@@ -23,7 +23,7 @@
 
 1. **Clone the Repository:**
     ```bash
-    git clone https://github.com/yourusername/PenguinJump.git
+    git clone [https://github.com/yourusername/PenguinJump.git](https://github.com/cenpnt/PenguinJump.git)
     ```
 2. **Install Requirements:**
    - Ensure you have Python 3.x installed.
