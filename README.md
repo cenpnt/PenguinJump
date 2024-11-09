@@ -39,6 +39,9 @@ The game integrates with a controller using a gyro sensor for movement and a but
 
 In **PenguinJump**, players control a penguin character navigating upward by jumping across platforms, avoiding enemies, and collecting points. The player can move left or right, jump, and shoot at enemies. As the penguin progresses through levels, the difficulty gradually increases.
 
+![Gameplay Video](https://github.com/cenpnt/PenguinJump/raw/main/PenguinJump_demonstration_1.gif)
+
+
 ## Class Structure
 
 ### Game Class
