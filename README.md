@@ -1,10 +1,22 @@
-# Pygame DoodleJump
-The simplest doodle jump made with python3 and pygame in only 2 days
+# PenguinJump Game
+
+#Overview
+PenguinJump is a 2D platformer game developed with Pygame. The game follows the Singleton design pattern and includes key features such as player movement, camera control, level management, and basic UI elements for a fun and engaging experience.
+
 
 ## Table of contents
-* [General info](#general-info)
-* [Requirements](#requirements)
-* [Setup](#setup)
+* [Installation](#installation)
+* [Gameplay](#gameplay)
+* [Class Structure](#class-structure)
+  * [Game Class](#game-class)
+  * [Enemy Class](#enemy-class)
+  * [Player Class](#player-class)
+  * [Bullet Class](#bullet-class)
+  * [Camera Class](#camera-class)
+  * [Sprite Class](#sprite-class)
+  * [Singleton Class](#singleton-class)
+  * [setting Class](#setting-class)
+* [Setting and Customization](#setting-and-customization)
 
 ![Screenshot](https://github.com/MykleCode/pygame-doodlejump/blob/main/demo.gif)
 
