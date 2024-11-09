@@ -45,11 +45,15 @@ class Game(Singleton):
 		self.score_txt = config.SMALL_FONT.render("0 m",1,config.GRAY)
 		self.score_pos = pygame.math.Vector2(10,10)
 
-		self.gameover_txt = config.LARGE_FONT.render("Game Over",1,config.WHITE)
-		self.gameover_rect = self.gameover_txt.get_rect(
-			center=(config.HALF_XWIN,config.HALF_YWIN))
-	
-	
+		# Game over text and restart instruction text
+		self.gameover_txt = config.LARGE_FONT.render("Game Over", 1, config.WHITE)
+		self.restart_txt = config.SMALL_FONT.render("Press Spacebar to restart the game", 1, config.WHITE)
+
+		# Center the game over text and place the restart text slightly below
+		self.gameover_rect = self.gameover_txt.get_rect(center=(config.HALF_XWIN, config.HALF_YWIN - 30))
+		self.restart_rect = self.restart_txt.get_rect(center=(config.HALF_XWIN, config.HALF_YWIN + 30))
+				
+				
 	def close(self):
 		self.__alive = False
 
@@ -99,6 +103,7 @@ class Game(Singleton):
 		# User Interface
 		if self.player.dead:
 			self.window.blit(self.gameover_txt,self.gameover_rect)# gameover txt
+			self.window.blit(self.restart_txt, self.restart_rect)
 		self.window.blit(self.score_txt, self.score_pos)# score txt
 
 		pygame.display.update()# window update

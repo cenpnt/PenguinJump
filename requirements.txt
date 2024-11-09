@@ -1,1 +1,6 @@
 pygame==2.6.1
+smbus==1.1.post2 
+mpu6050-raspberrypi==1.2 
+numpy==2.1.3
+scipy==1.14.1 
+RPi.GPIO==0.7.1
