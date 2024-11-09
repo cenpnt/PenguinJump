@@ -3,6 +3,7 @@
 ## Overview
 
 **PenguinJump** is a 2D platformer game developed with Pygame. The game follows the Singleton design pattern and includes key features such as player movement, camera control, level management, and basic UI elements for a fun and engaging experience.
+The game integrates with a controller using a gyro sensor for movement and a button for shooting.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -17,7 +18,6 @@
   - [Singleton Class](#singleton-class)
   - [Settings Class](#settings-class)
 - [Settings and Customization](#settings-and-customization)
-- [License](#license)
 
 ## Installation
 
