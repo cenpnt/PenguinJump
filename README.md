@@ -5,29 +5,28 @@ PenguinJump is a 2D platformer game developed with Pygame. The game follows the 
 
 
 ## Table of contents
-*  [Installation](#installation)
-*  [Gameplay](#gameplay)
-*  [Class Structure](#class-structure)
-  *  [Game Class](#game-class)
-  *  [Enemy Class](#enemy-class)
-  *  [Player Class](#player-class)
-  *  [Bullet Class](#bullet-class)
-  *  [Camera Class](#camera-class)
-  *  [Sprite Class](#sprite-class)
-  *  [Singleton Class](#singleton-class)
-  *  [setting Class](#setting-class)
-*  [Setting and Customization](#setting-and-customization)
+1. [Installation](#installation)
+2. [Gameplay](#gameplay)
+3. [Class Structure](#class-structure)
+   - [Game Class](#game-class)
+   - [Enemy Class](#enemy-class)
+   - [Player Class](#player-class)
+   - [Bullet Class](#bullet-class)
+   - [Camera Class](#camera-class)
+   - [Sprite Class](#sprite-class)
+   - [Singleton Class](#singleton-class)
+   - [setting Class](#setting-class)
+4. [Setting and Customization](#setting-and-customization)
 
-![Screenshot](https://github.com/MykleCode/pygame-doodlejump/blob/main/demo.gif)
 
 ## Installation
 1. ### clone the Repository:
-
+   <pre>```bash ```</pre>
 
 2. ### Install Requirements:
    * Ensure you have Python 3.X installed.
    * Install the dependencies:
-     ```pip install -r requirements.txt```
+     <pre>```bash pip install -r requirements.txt```</pre>
 
 
 ## Requirements
