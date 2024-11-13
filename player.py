@@ -121,10 +121,10 @@ class Player(Sprite, Singleton):
             tilt_x = gyro_data['y']
             
             # Simple left/right detection
-            if tilt_x > self.gyro_threshold:  # Tilted right
+            if tilt_x > self.gyro_threshold:  # Tilted left
                 self._input = -1
                 self._image = self._image_left
-            elif tilt_x < -self.gyro_threshold:  # Tilted left
+            elif tilt_x < -self.gyro_threshold:  # Tilted right
                 self._input = 1
                 self._image = self._image_right
             else:
